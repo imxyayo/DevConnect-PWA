@@ -1,52 +1,47 @@
-// sw.js - Service Worker con Cache API
+// sw.js - Service Worker con precaché del App Shell
 
-// 1. Definimos el nombre y la versión de la caché estática
+// 1. Nombre y versión de la caché estática
 const CACHE_NAME = 'devconnect-shell-v1';
 
-// 2. Listamos todos los recursos estáticos esenciales que forman el App Shell
+// 2. Recursos estáticos obligatorios
 const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/css/style.css',
-    '/js/app.js',
-    '/manifest.json',
-    '/images/icon-192x192.png',
-    '/images/icon-512x512.png',
-    'https://cdn.tailwindcss.com',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+    './',
+    './index.html',
+    './css/style.css',
+    './js/app.js',
+    './manifest.json',
+    './images/icon-192x192.png',
+    './images/icon-512x512.png'
 ];
 
-// FASE DE INSTALACIÓN: Guardando recursos estáticos
+// INSTALL: guardamos los recursos estáticos
 self.addEventListener('install', event => {
     console.log('SW: Guardando recursos estáticos en la caché...');
-    
-    // Esperamos a que la promesa de guardado se complete antes de finalizar la instalación
+
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('SW: Caché abierta con éxito:', CACHE_NAME);
-                // Agregamos todos los archivos estáticos a la memoria caché
+                console.log('SW: Caché abierta:', CACHE_NAME);
                 return cache.addAll(STATIC_ASSETS);
             })
             .then(() => {
-                console.log('SW: Todos los archivos del App Shell fueron almacenados.');
-                // Forzamos al nuevo Service Worker a activarse de inmediato
+                console.log('SW: App Shell almacenado completo.');
                 return self.skipWaiting();
             })
             .catch(err => {
-                console.error('SW: Falló el almacenamiento en caché del App Shell:', err);
+                console.error('SW: Falló el precaché:', err);
+                throw err; // para que se note si algo sale mal
             })
     );
 });
 
-// FASE DE ACTIVACIÓN
+// ACTIVATE
 self.addEventListener('activate', event => {
     console.log('SW: Activado y listo.');
-    return self.clients.claim();
+    event.waitUntil(self.clients.claim());
 });
 
-// FASE FETCH (Escuchando peticiones)
+// FETCH: por ahora solo monitoreamos
 self.addEventListener('fetch', event => {
-    // Por ahora solo monitoreamos en consola
     console.log('SW pidiendo:', event.request.url);
 });
