@@ -4,12 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevConnect - Red Social</title>
-    <!-- Usamos Tailwind CSS por CDN para prototipar rapidísimo el App Shell -->
+
+    <!-- Configuración para PWA -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2563eb">
+
+    <!-- Ícono para pestañas del navegador -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./images/icon-192x192.png">
+
+    <!-- Ícono para dispositivos iOS (Apple) -->
+    <link rel="apple-touch-icon" href="./images/icon-192x192.png">
+
+    <!-- Estilos -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Iconos de FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="./css/style.css">
 </head>
+
 <body class="bg-gray-100 h-screen flex flex-col font-sans">
 
     <!-- Header / Top App Bar -->
@@ -27,7 +38,7 @@
         <article class="bg-white p-4 rounded-lg shadow mb-4">
             <div class="flex items-center mb-3">
                 <div class="w-10 h-10 rounded-full bg-blue-300 flex items-center justify-center text-white font-bold mr-3">
-                    P
+                    
                 </div>
                 <div>
                     <h2 class="font-bold text-gray-800">Profesor Web</h2>
