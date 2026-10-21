@@ -1,9 +1,7 @@
-// sw.js - Service Worker con precaché del App Shell
+// sw.js - Service Worker con precaché del App Shell y estrategia Cache First
 
-// 1. Nombre y versión de la caché estática
 const CACHE_NAME = 'devconnect-shell-v1';
 
-// 2. Recursos estáticos obligatorios
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -14,7 +12,7 @@ const STATIC_ASSETS = [
     './images/icon-512x512.png'
 ];
 
-// INSTALL: guardamos los recursos estáticos
+// INSTALL: Precaché de recursos
 self.addEventListener('install', event => {
     console.log('SW: Guardando recursos estáticos en la caché...');
 
@@ -25,23 +23,39 @@ self.addEventListener('install', event => {
                 return cache.addAll(STATIC_ASSETS);
             })
             .then(() => {
-                console.log('SW: App Shell almacenado completo.');
+                console.log('SW: App Shell almacenado completo.x|');
                 return self.skipWaiting();
             })
             .catch(err => {
                 console.error('SW: Falló el precaché:', err);
-                throw err; // para que se note si algo sale mal
+                throw err;
             })
     );
 });
 
-// ACTIVATE
+// ACTIVATE: Tomar control de clientes inmediatamente
 self.addEventListener('activate', event => {
     console.log('SW: Activado y listo.');
     event.waitUntil(self.clients.claim());
 });
 
-// FETCH: por ahora solo monitoreamos
+// FETCH: Estrategia Cache First
 self.addEventListener('fetch', event => {
-    console.log('SW pidiendo:', event.request.url);
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => {
+                // Si el recurso está en la caché, se entrega desde ahí
+                if (response) {
+                    console.log('SW: Sirviendo desde Caché:', event.request.url);
+                    return response;
+                }
+                
+                // Si no está en caché, realiza la petición a la red
+                console.log('SW: Buscando en red:', event.request.url);
+                return fetch(event.request);
+            })
+            .catch(err => {
+                console.error('SW: Error en fetch/caché:', err);
+            })
+    );
 });
