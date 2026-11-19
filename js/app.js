@@ -1,81 +1,70 @@
-// js/app.js - App Shell, Service Worker y Renderizado Dinámico (CSR)
-
-console.log('App Shell de DevConnect inicializado correctamente.');
-
-// Evento para el botón de recargar
-const btnSync = document.getElementById('btn-sync');
-if (btnSync) {
-    btnSync.addEventListener('click', () => {
-        alert('Pronto aquí implementaremos la sincronización con Background Sync.');
-    });
-}
-
-// 1. Verificamos si el navegador soporta Service Workers
-if ('serviceWorker' in navigator) {
-    // 2. Registramos el Service Worker usando ruta relativa
-    navigator.serviceWorker.register('./sw.js')
-        .then(registro => {
-            console.log('¡Éxito! Service Worker registrado correctamente.', registro);
-        })
-        .catch(error => {
-            console.warn('Error al registrar el Service Worker:', error);
-        });
-} else {
-    console.error('Este navegador no soporta Service Workers.');
-}
-
-// 3. Renderizado Dinámico CSR (Client-Side Rendering)
 document.addEventListener('DOMContentLoaded', () => {
-    renderPosts();
+    const formulario = document.getElementById('form-post');
+    
+    // 1. Cargar y renderizar posts guardados en IndexedDB al abrir la app
+    cargarYRenderizarPosts();
+
+    // 2. Escuchar la creación de nuevos elementos
+    if (formulario) {
+        formulario.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const textoInput = document.getElementById('input-contenido').value;
+            if (!textoInput.trim()) return;
+
+            // Objeto nuevo con ID único basado en timestamp
+            const nuevoPost = {
+                id: Date.now().toString(),
+                autor: 'Desarrollador Local',
+                contenido: textoInput,
+                fecha: new Date().toLocaleTimeString()
+            };
+
+            // Guardamos en IndexedDB (Funciona 100% Offline)
+            await guardarPost(nuevoPost);
+            
+            // Limpiamos el formulario y actualizamos la pantalla
+            formulario.reset();
+            await cargarYRenderizarPosts();
+        });
+    }
 });
 
-function renderPosts() {
-    const feedContainer = document.getElementById('feed');
+// Función para leer desde IndexedDB y pintar en la pantalla 
+async function cargarYRenderizarPosts() { 
+    const feedContainer = document.getElementById('feed'); 
     if (!feedContainer) return;
 
-    // Arreglo de publicaciones dinámicas (mínimo 3 elementos)
-    const posts = [
-        {
-            autor: 'Profesor Web',
-            tiempo: 'Hace 2 minutos',
-            contenido: '¡Bienvenidos a nuestra red social de la clase! Pronto esta app funcionará 100% sin conexión. 🚀',
-            avatarBg: 'bg-blue-500'
-        },
-        {
-            autor: 'Jair Prieto',
-            tiempo: 'Hace 15 minutos',
-            contenido: 'Probando la Splash Screen y el renderizado dinámico mediante CSR en DevConnect. 💻✨',
-            avatarBg: 'bg-emerald-500'
-        },
-        {
-            autor: 'DevConnect Bot',
-            tiempo: 'Hace 1 hora',
-            contenido: 'El App Shell y los recursos estáticos se cargan dinámicamente desde el cliente.',
-            avatarBg: 'bg-purple-500'
-        }
-    ];
-
-    // Limpiamos el contenedor
+    // Leemos directamente de la base de datos del navegador
+    const posts = await obtenerPosts();
     feedContainer.innerHTML = '';
 
-    // Renderizamos cada elemento dentro del feed
-    posts.forEach(post => {
-        const article = document.createElement('article');
-        article.className = 'bg-white p-4 rounded-lg shadow mb-4 transition hover:shadow-md';
-        article.innerHTML = `
-            <div class="flex items-center mb-3">
-                <div class="w-10 h-10 rounded-full ${post.avatarBg} flex items-center justify-center text-white font-bold mr-3 shadow-sm">
-                    ${post.autor.charAt(0)}
-                </div>
-                <div>
-                    <h2 class="font-bold text-gray-800">${post.autor}</h2>
-                    <p class="text-xs text-gray-500">${post.tiempo}</p>
-                </div>
-            </div>
-            <p class="text-gray-700 leading-relaxed">${post.contenido}</p>
-        `;
-        feedContainer.appendChild(article);
-    });
+    if (posts.length === 0) {
+        feedContainer.innerHTML = '<p class="text-center text-gray-500 py-4">No hay publicaciones locales.</p>';
+        return;
+    }
 
-    console.log('CSR: 3 publicaciones renderizadas dinámicamente en el cliente.');
+    // Pintamos los registros guardados
+    posts.forEach(post => {
+        feedContainer.innerHTML += `
+            <article class="bg-white p-4 rounded-lg shadow mb-4 flex justify-between items-start">
+                <div>
+                    <div class="flex items-center mb-1">
+                        <span class="font-bold text-gray-800 text-sm mr-2">${post.autor}</span>
+                        <span class="text-xs text-gray-400">${post.tiempo}</span>
+                    </div>
+                    <p class="text-gray-700">${post.contenido}</p>
+                </div>
+                <button onclick="borrarPostHandler('${post.id}')" class="text-red-500 hover:text-red-700 text-xs p-1">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </article>
+        `;
+    });
+}
+
+// Handler global para eliminar un registro 
+async function borrarPostHandler(id) { 
+    await eliminarPost(id); 
+    await cargarYRenderizarPosts(); 
 }
