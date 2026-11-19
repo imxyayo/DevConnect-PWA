@@ -11,11 +11,9 @@
 
     <!-- Ícono para pestañas del navegador -->
     <link rel="icon" type="image/png" sizes="192x192" href="./images/icon-192x192.png">
-
-    <!-- Ícono para dispositivos iOS (Apple) -->
     <link rel="apple-touch-icon" href="./images/icon-192x192.png">
 
-    <!-- Incluimos la librería idb ligera (versión 7+ basada en Promesas) -->
+    <!-- Librería idb ligera -->
     <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
 
     <!-- Estilos -->
@@ -39,10 +37,27 @@
         <!-- Las publicaciones se renderizan dinámicamente aquí -->
     </main>
 
-    <!-- Botón Flotante para nueva publicación (FAB) - Tal como lo pidió el profe -->
-    <button class="fixed bottom-20 right-4 bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg text-2xl flex items-center justify-center hover:bg-blue-700 transition">
+    <!-- Botón Flotante para nueva publicación (FAB) -->
+    <button id="btn-fab" class="fixed bottom-20 right-4 bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg text-2xl flex items-center justify-center hover:bg-blue-700 transition">
         <i class="fa-solid fa-pen"></i>
     </button>
+
+    <!-- Modal para Capturar Nuevos Datos -->
+    <div id="modal-post" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-5">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold text-gray-800">Nueva Publicación</h2>
+                <button type="button" id="btn-cerrar-modal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <form id="form-post">
+                <textarea id="input-contenido" rows="3" required placeholder="Escribe una nota o publicación offline..." class="w-full border border-gray-300 rounded-lg p-3 text-sm mb-4 focus:outline-none focus:border-blue-600"></textarea>
+                <div class="flex justify-end gap-2">
+                    <button type="button" id="btn-cancelar-modal" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Barra de Navegación Inferior (Bottom Navigation) -->
     <nav class="bg-white border-t border-gray-200 fixed bottom-0 w-full flex justify-around p-3 text-gray-500 pb-safe">
@@ -65,7 +80,7 @@
     </nav>
 
     <!-- Scripts de la Base de Datos y Lógica -->
-    <script src="js/db.js"></script>
-    <script src="js/app.js"></script>
+    <script src="./js/db.js"></script>
+    <script src="./js/app.js"></script>
 </body>
 </html>
